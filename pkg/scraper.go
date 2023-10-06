@@ -54,8 +54,6 @@ func (s *Scraper) FetchData() ([]map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	output := fmt.Sprintf("found datasource link: %s", ds)
-	fmt.Println(output)
 
 	resp, err := http.Get(ds)
 	if err != nil {

@@ -74,6 +74,6 @@ func (h *Handler) Find(company string) {
 	orgs := h.searchInOrganisations(company)
 
 	for _, org := range orgs {
-		fmt.Println(fmt.Sprintf("company %s found, and it is ranked as %s", org.name, org.typeAndRating))
+		fmt.Println(fmt.Sprintf("company %s found, and it is ranked as %s and can provide the %s", org.name, org.typeAndRating, org.route))
 	}
 }
