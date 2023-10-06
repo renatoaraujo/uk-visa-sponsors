@@ -25,3 +25,11 @@ If you prefer not to employ `make`, no worries! Construct and execute directly f
 ```bash
 go build -o sponsors . && chmod +x ./sponsors && ./sponsors find -c [company-name]
 ```
+
+## Credits
+
+* [Renato Araujo](https://www.linkedin.com/in/renatoraraujo/)
+
+## License
+
+The MIT License (MIT) - see [`LICENSE`](LICENSE) for more details
