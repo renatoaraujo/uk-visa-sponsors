@@ -15,7 +15,7 @@ var findCmd = &cobra.Command{
 	Short: "Find a specific company by it's name",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		scraper := pkg.NewScraper("google.com")
+		scraper := pkg.NewScraper("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
 		service := internal.NewHandler(scraper)
 		service.Find(companyName)
 

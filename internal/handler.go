@@ -3,7 +3,7 @@ package internal
 import "fmt"
 
 type DataFetcher interface {
-	FetchData()
+	FetchData() error
 }
 
 type Handler struct {
@@ -11,6 +11,10 @@ type Handler struct {
 }
 
 func (h Handler) fetchData() []string {
+	err := h.DataFetcher.FetchData()
+	if err != nil {
+		panic("fudeu")
+	}
 	return []string{}
 }
 
@@ -19,5 +23,6 @@ func NewHandler(df DataFetcher) Handler {
 }
 
 func (h Handler) Find(company string) {
+	h.fetchData()
 	fmt.Println("trying to find the company")
 }
