@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"renatoaraujo/uk-visa-sponsors/internal"
+	"renatoaraujo/uk-visa-sponsors/pkg"
+
 	"github.com/spf13/cobra"
 )
 
@@ -11,6 +14,10 @@ var findCmd = &cobra.Command{
 	Use:   "find",
 	Short: "Find a specific company by it's name",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		scraper := pkg.NewScraper("google.com")
+		service := internal.NewHandler(scraper)
+		service.Find(companyName)
 
 		fmt.Println("yes! but not sure, logic is not ready :)")
 	},
