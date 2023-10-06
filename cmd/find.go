@@ -19,6 +19,7 @@ var findCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		p := data.NewCSVProcessor()
+		// TODO: enable configuration, but since this is likely to keep for a while I will keep hardcoded
 		f := data.NewCSVScraper("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
 
 		handler, err := sponsors.NewHandler(f, p, true)
@@ -28,8 +29,11 @@ var findCmd = &cobra.Command{
 
 		orgs := handler.Organisations.SearchOrganisationsByName(companyName)
 		for _, org := range orgs {
-			color.Green("company %s is licensed to provide the %s Visa", org.Name, org.VisaType)
+			color.Green("%s is licensed to provide the %s Visa!", org.Name, org.VisaType)
 		}
+
+		fmt.Println()
+		color.Yellow("Keep in mind, just because a company is licensed to sponsor a Visa doesn't mean they necessarily will for your role.")
 
 		return nil
 	},
