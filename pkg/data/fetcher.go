@@ -1,7 +1,6 @@
-package pkg
+package data
 
 import (
-	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
@@ -9,17 +8,22 @@ import (
 	"regexp"
 )
 
+type DataFetcher interface {
+	FetchDataSource() (string, error)
+	FetchCSVData(url string) ([]byte, error)
+}
+
 type Scraper struct {
 	url string
 }
 
-func NewScraper(url string) *Scraper {
+func NewDataFetcher(url string) DataFetcher {
 	return &Scraper{
 		url: url,
 	}
 }
 
-func (s *Scraper) findDataSource() (string, error) {
+func (s *Scraper) FetchDataSource() (string, error) {
 	resp, err := http.Get(s.url)
 	if err != nil {
 		return "", fmt.Errorf("error getting content from %s: %v", s.url, err)
@@ -49,35 +53,17 @@ func (s *Scraper) findDataSource() (string, error) {
 	return match, nil
 }
 
-func (s *Scraper) FetchData() ([]map[string]string, error) {
-	ds, err := s.findDataSource()
+func (s *Scraper) FetchCSVData(url string) ([]byte, error) {
+	resp, err := http.Get(url)
 	if err != nil {
-		return nil, err
-	}
-
-	resp, err := http.Get(ds)
-	if err != nil {
-		return nil, fmt.Errorf("error getting content from datasource %s: %v", ds, err)
+		return nil, fmt.Errorf("error getting content from %s: %v", url, err)
 	}
 	defer resp.Body.Close()
 
-	reader := csv.NewReader(resp.Body)
-	records, err := reader.ReadAll()
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error reading CSV: %v", err)
+		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	var data []map[string]string
-	for _, record := range records[1:] {
-		entry := map[string]string{
-			"OrganisationName": record[0],
-			"TownCity":         record[1],
-			"County":           record[2],
-			"TypeAndRating":    record[3],
-			"Route":            record[4],
-		}
-		data = append(data, entry)
-	}
-
-	return data, nil
+	return body, nil
 }

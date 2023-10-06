@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"renatoaraujo/uk-visa-sponsors/internal"
-	"renatoaraujo/uk-visa-sponsors/pkg"
+	"renatoaraujo/uk-visa-sponsors/internal/sponsors"
+	"renatoaraujo/uk-visa-sponsors/pkg/data"
 
 	"github.com/spf13/cobra"
 )
@@ -15,8 +15,11 @@ var findCmd = &cobra.Command{
 	Use:   "find",
 	Short: "Find a specific company by it's name",
 	Run: func(cmd *cobra.Command, args []string) {
-		scraper := pkg.NewScraper("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
-		service := internal.NewHandler(scraper)
+
+		dp := data.NewCSVProcessor()
+		df := data.NewDataFetcher("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
+
+		service := sponsors.NewHandler(df, dp)
 		service.Find(companyName)
 	},
 }

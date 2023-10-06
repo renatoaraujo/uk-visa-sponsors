@@ -1,4 +1,4 @@
-package internal
+package sponsors
 
 import (
 	"fmt"
@@ -7,11 +7,17 @@ import (
 )
 
 type DataFetcher interface {
-	FetchData() ([]map[string]string, error)
+	FetchDataSource() (string, error)
+	FetchCSVData(url string) ([]byte, error)
+}
+
+type DataProcessor interface {
+	ProcessCSVData(data []byte) ([]map[string]string, error)
 }
 
 type Handler struct {
-	DataFetcher DataFetcher
+	DataFetcher   DataFetcher
+	DataProcessor DataProcessor
 }
 
 type Organisation struct {
@@ -26,12 +32,22 @@ var cachedOrgs []Organisation
 
 func (h *Handler) loadData() error {
 	if cachedOrgs == nil {
-		data, err := h.DataFetcher.FetchData()
+		dataSource, err := h.DataFetcher.FetchDataSource()
 		if err != nil {
 			return err
 		}
 
-		for _, entry := range data {
+		csvData, err := h.DataFetcher.FetchCSVData(dataSource)
+		if err != nil {
+			return err
+		}
+
+		processedData, err := h.DataProcessor.ProcessCSVData(csvData)
+		if err != nil {
+			return err
+		}
+
+		for _, entry := range processedData {
 			org := Organisation{
 				name:          entry["OrganisationName"],
 				townCity:      entry["TownCity"],
@@ -46,8 +62,11 @@ func (h *Handler) loadData() error {
 	return nil
 }
 
-func NewHandler(df DataFetcher) *Handler {
-	return &Handler{DataFetcher: df}
+func NewHandler(df DataFetcher, dp DataProcessor) *Handler {
+	return &Handler{
+		DataFetcher:   df,
+		DataProcessor: dp,
+	}
 }
 
 func (h *Handler) searchInOrganisations(name string) []Organisation {
