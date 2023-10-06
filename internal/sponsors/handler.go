@@ -19,32 +19,38 @@ type Handler struct {
 	Organisations Organisations
 }
 
-func NewHandler(f Fetcher, p Processor) (*Handler, error) {
+func NewHandler(f Fetcher, p Processor, load bool) (*Handler, error) {
 	h := &Handler{
 		Fetcher:   f,
 		Processor: p,
 	}
 
-	if err := h.Load(); err != nil {
-		return nil, fmt.Errorf("failed to load organisations; %w", err)
+	if load {
+		if err := h.Load(""); err != nil {
+			return nil, fmt.Errorf("failed to load organisations; %w", err)
+		}
 	}
 
 	return h, nil
 }
 
-func (h *Handler) Load() error {
+func (h *Handler) Load(dataSource string) error {
+	var err error
+
 	if h.Organisations.list == nil {
-		dataSource, err := h.Fetcher.FetchDataSource()
+		if dataSource == "" {
+			dataSource, err = h.Fetcher.FetchDataSource()
+			if err != nil {
+				return err
+			}
+		}
+
+		rawData, err := h.Fetcher.FetchData(dataSource)
 		if err != nil {
 			return err
 		}
 
-		csvData, err := h.Fetcher.FetchData(dataSource)
-		if err != nil {
-			return err
-		}
-
-		processedData, err := h.Processor.ProcessRawData(csvData)
+		processedData, err := h.Processor.ProcessRawData(rawData)
 		if err != nil {
 			return err
 		}
@@ -58,5 +64,5 @@ func (h *Handler) Load() error {
 		}
 	}
 
-	return nil
+	return err
 }

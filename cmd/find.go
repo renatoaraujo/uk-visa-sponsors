@@ -20,7 +20,7 @@ var findCmd = &cobra.Command{
 		p := data.NewCSVProcessor()
 		f := data.NewCSVScraper("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
 
-		handler, err := sponsors.NewHandler(f, p)
+		handler, err := sponsors.NewHandler(f, p, true)
 		if err != nil {
 			log.Fatalf("failed to initialise handler; %w", err)
 		}
