@@ -8,22 +8,17 @@ import (
 	"regexp"
 )
 
-type Fetcher interface {
-	FetchDataSource() (string, error)
-	FetchData(url string) ([]byte, error)
-}
-
-type Scraper struct {
+type CSVScraper struct {
 	url string
 }
 
-func NewFetcher(url string) Fetcher {
-	return &Scraper{
+func NewCSVScraper(url string) *CSVScraper {
+	return &CSVScraper{
 		url: url,
 	}
 }
 
-func (s *Scraper) FetchDataSource() (string, error) {
+func (s *CSVScraper) FetchDataSource() (string, error) {
 	resp, err := http.Get(s.url)
 	if err != nil {
 		return "", fmt.Errorf("error getting content from %s: %v", s.url, err)
@@ -49,7 +44,7 @@ func (s *Scraper) FetchDataSource() (string, error) {
 	return match, nil
 }
 
-func (s *Scraper) FetchData(url string) ([]byte, error) {
+func (s *CSVScraper) FetchData(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error getting content from %s: %v", url, err)

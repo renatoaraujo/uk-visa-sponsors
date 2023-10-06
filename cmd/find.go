@@ -18,7 +18,7 @@ var findCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		p := data.NewCSVProcessor()
-		f := data.NewFetcher("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
+		f := data.NewCSVScraper("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
 
 		handler, err := sponsors.NewHandler(f, p)
 		if err != nil {
