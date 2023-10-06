@@ -3,7 +3,7 @@
 build:
 	go build -o sponsors
 
-find:
+find: build
 	@./sponsors find --company $(filter-out $@,$(MAKECMDGOALS))
 
 %:
