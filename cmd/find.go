@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"renatoaraujo/uk-visa-sponsors/internal/sponsors"
 	"renatoaraujo/uk-visa-sponsors/pkg/data"
@@ -28,8 +29,13 @@ var findCmd = &cobra.Command{
 		}
 
 		orgs := handler.Organisations.SearchOrganisationsByName(companyName)
+
 		for _, org := range orgs {
-			color.Green("%s is licensed to provide the %s Visa!", org.Name, org.VisaType)
+			quotedVisaTypes := make([]string, len(org.VisaType))
+			for i, v := range org.VisaType {
+				quotedVisaTypes[i] = fmt.Sprintf("\"%s\"", v)
+			}
+			color.Green("%s is authorized to sponsor the following visa types: %s.", org.Name, strings.Join(quotedVisaTypes, ", "))
 		}
 
 		fmt.Println()

@@ -10,7 +10,7 @@ type Organisations struct {
 
 type Organisation struct {
 	Name     string
-	VisaType string
+	VisaType []string
 }
 
 func (o *Organisations) SearchOrganisationsByName(name string) []Organisation {
@@ -23,4 +23,19 @@ func (o *Organisations) SearchOrganisationsByName(name string) []Organisation {
 	}
 
 	return found
+}
+
+func (o *Organisations) AddOrUpdateVisaType(name string, visaType string) {
+	for i, org := range o.list {
+		if org.Name == name {
+			o.list[i].VisaType = append(o.list[i].VisaType, visaType)
+			return
+		}
+	}
+
+	newOrg := Organisation{
+		Name:     name,
+		VisaType: []string{visaType},
+	}
+	o.list = append(o.list, newOrg)
 }

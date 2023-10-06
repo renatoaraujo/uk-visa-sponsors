@@ -57,11 +57,7 @@ func (h *Handler) Load(dataSource string) error {
 
 		// TODO: configure the dynamic header mapper
 		for _, entry := range processedData {
-			org := Organisation{
-				Name:     entry["Organisation Name"],
-				VisaType: entry["Route"],
-			}
-			h.Organisations.list = append(h.Organisations.list, org)
+			h.Organisations.AddOrUpdateVisaType(entry["Organisation Name"], entry["Route"])
 		}
 	}
 
