@@ -55,6 +55,7 @@ func (h *Handler) Load(dataSource string) error {
 			return err
 		}
 
+		// TODO: configure the dynamic header mapper
 		for _, entry := range processedData {
 			org := Organisation{
 				Name:     entry["Organisation Name"],
