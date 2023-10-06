@@ -49,7 +49,7 @@ func (s *Scraper) findDataSource() (string, error) {
 	return match, nil
 }
 
-func (s *Scraper) FetchData() ([]map[string]interface{}, error) {
+func (s *Scraper) FetchData() ([]map[string]string, error) {
 	ds, err := s.findDataSource()
 	if err != nil {
 		return nil, err
@@ -69,9 +69,9 @@ func (s *Scraper) FetchData() ([]map[string]interface{}, error) {
 		return nil, fmt.Errorf("error reading CSV: %v", err)
 	}
 
-	var data []map[string]interface{}
+	var data []map[string]string
 	for _, record := range records[1:] {
-		entry := map[string]interface{}{
+		entry := map[string]string{
 			"OrganisationName": record[0],
 			"TownCity":         record[1],
 			"County":           record[2],

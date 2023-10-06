@@ -7,7 +7,7 @@ import (
 )
 
 type DataFetcher interface {
-	FetchData() ([]map[string]interface{}, error)
+	FetchData() ([]map[string]string, error)
 }
 
 type Handler struct {
@@ -33,11 +33,11 @@ func (h *Handler) loadData() error {
 
 		for _, entry := range data {
 			org := Organisation{
-				name:          entry["OrganisationName"].(string),
-				townCity:      entry["TownCity"].(string),
-				country:       entry["County"].(string),
-				typeAndRating: entry["TypeAndRating"].(string),
-				route:         entry["Route"].(string),
+				name:          entry["OrganisationName"],
+				townCity:      entry["TownCity"],
+				country:       entry["County"],
+				typeAndRating: entry["TypeAndRating"],
+				route:         entry["Route"],
 			}
 			cachedOrgs = append(cachedOrgs, org)
 		}
@@ -76,5 +76,4 @@ func (h *Handler) Find(company string) {
 	for _, org := range orgs {
 		fmt.Println(fmt.Sprintf("company %s found, and it is ranked as %s", org.name, org.typeAndRating))
 	}
-
 }
