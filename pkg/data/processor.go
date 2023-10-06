@@ -5,31 +5,32 @@ import (
 	"strings"
 )
 
-type DataProcessor interface {
-	ProcessCSVData(data []byte) ([]map[string]string, error)
-}
-
 type CSVProcessor struct{}
 
-func NewCSVProcessor() DataProcessor {
+func NewCSVProcessor() *CSVProcessor {
 	return &CSVProcessor{}
 }
 
-func (cp *CSVProcessor) ProcessCSVData(data []byte) ([]map[string]string, error) {
+func (cp *CSVProcessor) ProcessRawData(data []byte) ([]map[string]string, error) {
 	reader := csv.NewReader(strings.NewReader(string(data)))
+
+	// Read the header
+	header, err := reader.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	// Read the rest of the data
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
 
 	var processedData []map[string]string
-	for _, record := range records[1:] {
-		entry := map[string]string{
-			"OrganisationName": record[0],
-			"TownCity":         record[1],
-			"County":           record[2],
-			"TypeAndRating":    record[3],
-			"Route":            record[4],
+	for _, record := range records {
+		entry := make(map[string]string)
+		for i, head := range header {
+			entry[head] = record[i]
 		}
 		processedData = append(processedData, entry)
 	}

@@ -8,16 +8,16 @@ import (
 	"regexp"
 )
 
-type DataFetcher interface {
+type Fetcher interface {
 	FetchDataSource() (string, error)
-	FetchCSVData(url string) ([]byte, error)
+	FetchData(url string) ([]byte, error)
 }
 
 type Scraper struct {
 	url string
 }
 
-func NewDataFetcher(url string) DataFetcher {
+func NewFetcher(url string) Fetcher {
 	return &Scraper{
 		url: url,
 	}
@@ -35,17 +35,13 @@ func (s *Scraper) FetchDataSource() (string, error) {
 		return "", fmt.Errorf("error reading response body: %v", err)
 	}
 
-	content := string(body)
-
-	// try to find any link that ends with .csv
 	pattern := `https?://[^"'\s]+\.csv`
 	re, err := regexp.Compile(pattern)
 	if err != nil {
 		return "", fmt.Errorf("error compiling regex: %v", err)
 	}
 
-	// return the first one or fail
-	match := re.FindString(content)
+	match := re.FindString(string(body))
 	if match == "" {
 		return "", errors.New("no csv link found")
 	}
@@ -53,7 +49,7 @@ func (s *Scraper) FetchDataSource() (string, error) {
 	return match, nil
 }
 
-func (s *Scraper) FetchCSVData(url string) ([]byte, error) {
+func (s *Scraper) FetchData(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error getting content from %s: %v", url, err)

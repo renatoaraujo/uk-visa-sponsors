@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"renatoaraujo/uk-visa-sponsors/internal/sponsors"
 	"renatoaraujo/uk-visa-sponsors/pkg/data"
@@ -13,14 +14,21 @@ var companyName string
 
 var findCmd = &cobra.Command{
 	Use:   "find",
-	Short: "Find a specific company by it's name",
+	Short: "Find the company by it's name and the type of the Visa they are licensed to provide.",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		dp := data.NewCSVProcessor()
-		df := data.NewDataFetcher("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
+		p := data.NewCSVProcessor()
+		f := data.NewFetcher("https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers")
 
-		service := sponsors.NewHandler(df, dp)
-		service.Find(companyName)
+		handler, err := sponsors.NewHandler(f, p)
+		if err != nil {
+			log.Fatalf("failed to initialise handler; %w", err)
+		}
+
+		orgs := handler.Organisations.SearchOrganisationsByName(companyName)
+		for _, org := range orgs {
+			fmt.Println(fmt.Sprintf("company %s is licensed to provide the %s Visa", org.Name, org.VisaType))
+		}
 	},
 }
 
