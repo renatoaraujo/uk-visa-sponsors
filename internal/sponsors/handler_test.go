@@ -7,7 +7,6 @@ import (
 	"renatoaraujo/uk-visa-sponsors/internal/sponsors"
 	mocks "renatoaraujo/uk-visa-sponsors/internal/sponsors/mocks"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -110,7 +109,11 @@ func TestNewHandler(t *testing.T) {
 			}
 
 			if handler != nil {
-				assert.IsType(t, &sponsors.Handler{}, handler)
+				require.IsType(t, &sponsors.Handler{}, handler)
+			}
+
+			if tt.load && !tt.wantErr {
+				require.NotEmpty(t, handler.Organisations)
 			}
 
 			mock.AssertExpectationsForObjects(t, fetcherMock)

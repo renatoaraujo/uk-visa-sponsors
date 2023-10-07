@@ -18,6 +18,10 @@ type Organisation struct {
 	Description string
 }
 
+func (o *Organisations) List() []Organisation {
+	return o.list
+}
+
 func (o *Organisations) SearchOrganisationsByName(name string) []Organisation {
 	var found []Organisation
 
