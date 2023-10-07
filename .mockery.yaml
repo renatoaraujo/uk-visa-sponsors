@@ -1,0 +1,9 @@
+with-expecter: true
+packages:
+  renatoaraujo/uk-visa-sponsors/internal/sponsors:
+    config:
+      all: True
+      dir: "{{.InterfaceDirRelative}}/mocks"
+      outpkg: "mocks_test"
+      filename: "{{.InterfaceName}}.go"
+      mockname: "{{.InterfaceName}}"

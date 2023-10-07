@@ -1,7 +1,10 @@
 .PHONY: build
 
 build:
-	go build -o sponsors
+	go build -o sponsors ./cmd/cli/main.go
+
+test:
+	go test -race -v ./...
 
 help: build
 	@./sponsors help

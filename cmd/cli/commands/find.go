@@ -1,4 +1,4 @@
-package cmd
+package commands
 
 import (
 	"fmt"
@@ -70,6 +70,6 @@ func init() {
 	findCmd.Flags().StringVarP(&role, "role", "r", "software engineering", "Role that you're interested.")
 	err := findCmd.MarkFlagRequired("company")
 	if err != nil {
-		log.Fatalf("failed to initialise; %w", err)
+		log.Fatalf("failed to initialise; %s", err)
 	}
 }
