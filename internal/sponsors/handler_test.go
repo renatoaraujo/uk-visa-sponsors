@@ -90,13 +90,12 @@ func TestNewHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			fetcherMock := &mocks.Fetcher{}
+			fetcherMock := mocks.NewFetcher(t)
 			if tt.fetcherSetup != nil {
 				tt.fetcherSetup(fetcherMock)
 			}
 
-			processorMock := &mocks.Processor{}
+			processorMock := mocks.NewProcessor(t)
 			if tt.processorSetup != nil {
 				tt.processorSetup(processorMock)
 			}
@@ -106,18 +105,12 @@ func TestNewHandler(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-			}
-
-			if handler != nil {
 				require.IsType(t, &sponsors.Handler{}, handler)
-			}
 
-			if tt.load && !tt.wantErr {
-				require.NotEmpty(t, handler.Organisations)
+				if tt.load && !tt.wantErr {
+					require.NotEmpty(t, handler.Organisations)
+				}
 			}
-
-			mock.AssertExpectationsForObjects(t, fetcherMock)
-			mock.AssertExpectationsForObjects(t, processorMock)
 		})
 	}
 }
@@ -140,9 +133,7 @@ func TestHandler_Load(t *testing.T) {
 					nil,
 				)
 				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(`"Organisation Name", "Town/City", "County", "Type & Rating", "Route"
-"Awesome company", "London", "United Kingdom", "Worker (A rating)", "Skilled Worker"
-`),
+					[]byte(""),
 					nil,
 				)
 			},
@@ -164,9 +155,7 @@ func TestHandler_Load(t *testing.T) {
 			datasource: "custom_datasource",
 			fetcherSetup: func(client *mocks.Fetcher) {
 				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(`"Organisation Name", "Town/City", "County", "Type & Rating", "Route"
-"Awesome company", "London", "United Kingdom", "Worker (A rating)", "Skilled Worker"
-`),
+					[]byte(""),
 					nil,
 				)
 			},
@@ -188,7 +177,7 @@ func TestHandler_Load(t *testing.T) {
 			datasource: "custom_datasource",
 			fetcherSetup: func(client *mocks.Fetcher) {
 				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(``),
+					[]byte(""),
 					nil,
 				)
 			},
@@ -248,12 +237,12 @@ func TestHandler_Load(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fetcherMock := &mocks.Fetcher{}
+			fetcherMock := mocks.NewFetcher(t)
 			if tt.fetcherSetup != nil {
 				tt.fetcherSetup(fetcherMock)
 			}
 
-			processorMock := &mocks.Processor{}
+			processorMock := mocks.NewProcessor(t)
 			if tt.processorSetup != nil {
 				tt.processorSetup(processorMock)
 			}
@@ -264,18 +253,15 @@ func TestHandler_Load(t *testing.T) {
 			err = handler.Load(tt.datasource)
 			if tt.wantErr {
 				require.Error(t, err)
-				require.Empty(t, handler.Organisations.List())
 			} else {
 				require.NoError(t, err)
 
 				if tt.wantEmptyOrgs {
 					require.Empty(t, handler.Organisations.List())
+				} else {
+					require.NotEmpty(t, handler.Organisations.List())
 				}
 			}
-
-			mock.AssertExpectationsForObjects(t, fetcherMock)
-			mock.AssertExpectationsForObjects(t, processorMock)
 		})
 	}
-
 }
