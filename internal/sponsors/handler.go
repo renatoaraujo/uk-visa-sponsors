@@ -1,6 +1,7 @@
 package sponsors
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -57,6 +58,10 @@ func (h *Handler) Load(dataSource string) error {
 
 		// TODO: configure the dynamic header mapper
 		for _, entry := range processedData {
+			if len(entry["Organisation Name"]) <= 0 || len(entry["Route"]) <= 0 {
+				return errors.New("incompatible data, expecting headers `Organisation Name` and `Route`")
+			}
+
 			h.Organisations.AddOrUpdateVisaType(entry["Organisation Name"], entry["Route"])
 		}
 	}
