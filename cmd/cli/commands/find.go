@@ -13,8 +13,6 @@ import (
 )
 
 var companyName string
-var provideDetails bool
-var role string
 
 var findCmd = &cobra.Command{
 	Use:   "find",
@@ -44,15 +42,6 @@ For AI-enhanced details, ensure your search result is unique. Future updates aim
 				quotedVisaTypes[i] = fmt.Sprintf("\"%s\"", v)
 			}
 			color.Green("%s is authorized to sponsor the following visa types: %s.", org.Name, strings.Join(quotedVisaTypes, ", "))
-			if provideDetails {
-				err = org.AddDescription(role)
-				if err != nil {
-					fmt.Println()
-					color.Red("failed to add details of %s; %w", org.Name, err)
-				}
-
-				color.Cyan("Details:\n%s", org.Description)
-			}
 
 		}
 
@@ -66,8 +55,6 @@ For AI-enhanced details, ensure your search result is unique. Future updates aim
 func init() {
 	rootCmd.AddCommand(findCmd)
 	findCmd.Flags().StringVarP(&companyName, "company", "c", "", "Company name.")
-	findCmd.Flags().BoolVarP(&provideDetails, "details", "d", false, "Provide more details for the company (requires OpenAI token).")
-	findCmd.Flags().StringVarP(&role, "role", "r", "software engineering", "Role that you're interested.")
 	err := findCmd.MarkFlagRequired("company")
 	if err != nil {
 		log.Fatalf("failed to initialise; %s", err)
