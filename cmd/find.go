@@ -13,10 +13,18 @@ import (
 )
 
 var companyName string
+var provideDetails bool
+var role string
 
 var findCmd = &cobra.Command{
 	Use:   "find",
 	Short: "Find the company by it's name and the type of the Visa they are licensed to provide.",
+	Long: `Easily verify if a company is a UK Visa sponsor and identify the types of Visas they offer. For deeper insights, leverage information powered by OpenAI GPT. 
+
+Note: Some companies are registered under different names with the government. For instance, you might find 'Facebook' instead of 'Meta'. 
+
+For AI-enhanced details, ensure your search result is unique. Future updates aim to use OpenAI to better match company names in the list.
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		p := data.NewCSVProcessor()
@@ -36,6 +44,16 @@ var findCmd = &cobra.Command{
 				quotedVisaTypes[i] = fmt.Sprintf("\"%s\"", v)
 			}
 			color.Green("%s is authorized to sponsor the following visa types: %s.", org.Name, strings.Join(quotedVisaTypes, ", "))
+			if provideDetails {
+				err = org.AddDescription(role)
+				if err != nil {
+					fmt.Println()
+					color.Red("failed to add details of %s; %w", org.Name, err)
+				}
+
+				color.Cyan("Details:\n%s", org.Description)
+			}
+
 		}
 
 		fmt.Println()
@@ -47,7 +65,9 @@ var findCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(findCmd)
-	findCmd.Flags().StringVarP(&companyName, "company", "c", "", "Company name")
+	findCmd.Flags().StringVarP(&companyName, "company", "c", "", "Company name.")
+	findCmd.Flags().BoolVarP(&provideDetails, "details", "d", false, "Provide more details for the company (requires OpenAI token).")
+	findCmd.Flags().StringVarP(&role, "role", "r", "software engineering", "Role that you're interested.")
 	err := findCmd.MarkFlagRequired("company")
 	if err != nil {
 		log.Fatalf("failed to initialise; %w", err)
