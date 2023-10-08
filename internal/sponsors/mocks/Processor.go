@@ -17,30 +17,18 @@ func (_m *Processor) EXPECT() *Processor_Expecter {
 	return &Processor_Expecter{mock: &_m.Mock}
 }
 
-// ProcessRawData provides a mock function with given fields: data
-func (_m *Processor) ProcessRawData(data []byte) ([]map[string]string, error) {
-	ret := _m.Called(data)
+// ProcessRawData provides a mock function with given fields: _a0, _a1
+func (_m *Processor) ProcessRawData(_a0 []byte, _a1 interface{}) error {
+	ret := _m.Called(_a0, _a1)
 
-	var r0 []map[string]string
-	var r1 error
-	if rf, ok := ret.Get(0).(func([]byte) ([]map[string]string, error)); ok {
-		return rf(data)
-	}
-	if rf, ok := ret.Get(0).(func([]byte) []map[string]string); ok {
-		r0 = rf(data)
+	var r0 error
+	if rf, ok := ret.Get(0).(func([]byte, interface{}) error); ok {
+		r0 = rf(_a0, _a1)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]map[string]string)
-		}
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func([]byte) error); ok {
-		r1 = rf(data)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // Processor_ProcessRawData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ProcessRawData'
@@ -49,24 +37,25 @@ type Processor_ProcessRawData_Call struct {
 }
 
 // ProcessRawData is a helper method to define mock.On call
-//   - data []byte
-func (_e *Processor_Expecter) ProcessRawData(data interface{}) *Processor_ProcessRawData_Call {
-	return &Processor_ProcessRawData_Call{Call: _e.mock.On("ProcessRawData", data)}
+//   - _a0 []byte
+//   - _a1 interface{}
+func (_e *Processor_Expecter) ProcessRawData(_a0 interface{}, _a1 interface{}) *Processor_ProcessRawData_Call {
+	return &Processor_ProcessRawData_Call{Call: _e.mock.On("ProcessRawData", _a0, _a1)}
 }
 
-func (_c *Processor_ProcessRawData_Call) Run(run func(data []byte)) *Processor_ProcessRawData_Call {
+func (_c *Processor_ProcessRawData_Call) Run(run func(_a0 []byte, _a1 interface{})) *Processor_ProcessRawData_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]byte))
+		run(args[0].([]byte), args[1].(interface{}))
 	})
 	return _c
 }
 
-func (_c *Processor_ProcessRawData_Call) Return(_a0 []map[string]string, _a1 error) *Processor_ProcessRawData_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *Processor_ProcessRawData_Call) Return(_a0 error) *Processor_ProcessRawData_Call {
+	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *Processor_ProcessRawData_Call) RunAndReturn(run func([]byte) ([]map[string]string, error)) *Processor_ProcessRawData_Call {
+func (_c *Processor_ProcessRawData_Call) RunAndReturn(run func([]byte, interface{}) error) *Processor_ProcessRawData_Call {
 	_c.Call.Return(run)
 	return _c
 }

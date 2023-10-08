@@ -1,70 +1,47 @@
 package sponsors
 
-import (
-	"errors"
-	"fmt"
-)
+type Handler struct {
+	Scraper          Scraper
+	Processor        Processor
+	OrganisationList *OrganisationList
+}
 
-type Fetcher interface {
-	FetchDataSource() (string, error)
-	FetchData(url string) ([]byte, error)
+type Scraper interface {
+	FindDataSourceURL(string, string) (string, error)
+	GetContent(string) ([]byte, error)
 }
 
 type Processor interface {
-	ProcessRawData(data []byte) ([]map[string]string, error)
+	ProcessRawData([]byte, interface{}) error
 }
 
-type Handler struct {
-	Fetcher       Fetcher
-	Processor     Processor
-	Organisations Organisations
-}
-
-func NewHandler(f Fetcher, p Processor, load bool) (*Handler, error) {
-	h := &Handler{
-		Fetcher:   f,
-		Processor: p,
+func NewHandler(s Scraper, p Processor) Handler {
+	return Handler{
+		Scraper:          s,
+		Processor:        p,
+		OrganisationList: &OrganisationList{Organisations: []Organisation{}},
 	}
-
-	if load {
-		if err := h.Load(""); err != nil {
-			return nil, fmt.Errorf("failed to load organisations; %w", err)
-		}
-	}
-
-	return h, nil
 }
 
 func (h *Handler) Load(dataSource string) error {
 	var err error
 
-	if h.Organisations.list == nil {
-		if dataSource == "" {
-			dataSource, err = h.Fetcher.FetchDataSource()
-			if err != nil {
-				return err
-			}
-		}
-
-		rawData, err := h.Fetcher.FetchData(dataSource)
+	if dataSource == "" {
+		dataSource, err = h.Scraper.FindDataSourceURL("csv", "/government/publications/register-of-licensed-sponsors-workers")
 		if err != nil {
 			return err
-		}
-
-		processedData, err := h.Processor.ProcessRawData(rawData)
-		if err != nil {
-			return err
-		}
-
-		// TODO: configure the dynamic header mapper
-		for _, entry := range processedData {
-			if len(entry["Organisation Name"]) <= 0 || len(entry["Route"]) <= 0 {
-				return errors.New("incompatible data, expecting headers `Organisation Name` and `Route`")
-			}
-
-			h.Organisations.AddOrUpdateVisaType(entry["Organisation Name"], entry["Route"])
 		}
 	}
 
-	return err
+	rawData, err := h.Scraper.GetContent(dataSource)
+	if err != nil {
+		return err
+	}
+
+	err = h.Processor.ProcessRawData(rawData, &h.OrganisationList.Organisations)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

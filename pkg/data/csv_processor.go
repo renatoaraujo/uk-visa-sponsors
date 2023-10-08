@@ -1,8 +1,10 @@
 package data
 
 import (
-	"encoding/csv"
-	"strings"
+	"errors"
+	"reflect"
+
+	"github.com/jszwec/csvutil"
 )
 
 type CSVProcessor struct{}
@@ -11,27 +13,25 @@ func NewCSVProcessor() *CSVProcessor {
 	return &CSVProcessor{}
 }
 
-func (cp *CSVProcessor) ProcessRawData(data []byte) ([]map[string]string, error) {
-	reader := csv.NewReader(strings.NewReader(string(data)))
-
-	header, err := reader.Read()
-	if err != nil {
-		return nil, err
+func isSliceOfStructsPointer(v interface{}) bool {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr {
+		return false
 	}
 
-	records, err := reader.ReadAll()
-	if err != nil {
-		return nil, err
+	elem := val.Elem()
+	if elem.Kind() != reflect.Slice {
+		return false
 	}
-
-	var processedData []map[string]string
-	for _, record := range records {
-		entry := make(map[string]string)
-		for i, head := range header {
-			entry[head] = record[i]
-		}
-		processedData = append(processedData, entry)
+	if elem.Type().Elem().Kind() != reflect.Struct {
+		return false
 	}
+	return true
+}
 
-	return processedData, nil
+func (cp *CSVProcessor) ProcessRawData(data []byte, ref interface{}) error {
+	if !isSliceOfStructsPointer(ref) {
+		return errors.New("expected a pointer to a slice of structs")
+	}
+	return csvutil.Unmarshal(data, ref)
 }

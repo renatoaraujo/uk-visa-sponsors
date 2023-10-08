@@ -7,260 +7,78 @@ import (
 	"renatoaraujo/uk-visa-sponsors/internal/sponsors"
 	mocks "renatoaraujo/uk-visa-sponsors/internal/sponsors/mocks"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewHandler(t *testing.T) {
-	tests := []struct {
-		name           string
-		load           bool
-		fetcherSetup   func(client *mocks.Fetcher)
-		processorSetup func(client *mocks.Processor)
-		wantErr        bool
-	}{
-		{
-			name:    "Successfully initialise Handler without preloading data",
-			load:    false,
-			wantErr: false,
-		},
-		{
-			name: "Successfully to initialise Handler preloading data",
-			load: true,
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchDataSource").Return(
-					"datasource",
-					nil,
-				)
-				client.On("FetchData", mock.Anything).Return(
-					[]byte("some primitive data"),
-					nil,
-				)
-			},
-			processorSetup: func(client *mocks.Processor) {
-				client.On("ProcessRawData", mock.Anything).Return(
-					[]map[string]string{
-						{
-							"Organisation Name": "Awesome company",
-							"Route":             "Skilled Worker Visa",
-						},
-					},
-					nil,
-				)
-			},
-			wantErr: false,
-		},
-		{
-			name: "Failed to initialise Handler preloading due to failure on fetching data",
-			load: true,
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchDataSource").Return(
-					"datasource",
-					nil,
-				)
-				client.On("FetchData", mock.Anything).Return(
-					nil,
-					errors.New("failed to fetch data"),
-				)
-			},
-			wantErr: true,
-		},
-		{
-			name: "Failed to initialise Handler preloading due to failure on processing raw data",
-			load: true,
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchDataSource").Return(
-					"datasource",
-					nil,
-				)
-				client.On("FetchData", mock.Anything).Return(
-					[]byte("some primitive data"),
-					nil,
-				)
-			},
-			processorSetup: func(client *mocks.Processor) {
-				client.On("ProcessRawData", mock.Anything).Return(
-					nil,
-					errors.New("failed to process data"),
-				)
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			fetcherMock := mocks.NewFetcher(t)
-			if tt.fetcherSetup != nil {
-				tt.fetcherSetup(fetcherMock)
-			}
-
-			processorMock := mocks.NewProcessor(t)
-			if tt.processorSetup != nil {
-				tt.processorSetup(processorMock)
-			}
-
-			handler, err := sponsors.NewHandler(fetcherMock, processorMock, tt.load)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				require.IsType(t, &sponsors.Handler{}, handler)
-
-				if tt.load && !tt.wantErr {
-					require.NotEmpty(t, handler.Organisations)
-				}
-			}
-		})
-	}
-}
-
-func TestHandler_Load(t *testing.T) {
+func TestHandler_Load_New(t *testing.T) {
 	tests := []struct {
 		name           string
 		datasource     string
-		fetcherSetup   func(client *mocks.Fetcher)
-		processorSetup func(client *mocks.Processor)
-		wantEmptyOrgs  bool
-		wantErr        bool
+		scraperSetup   func(*mocks.Scraper)
+		processorSetup func(*mocks.Processor)
+		expectError    bool
 	}{
 		{
 			name:       "Successfully load data using default datasource",
 			datasource: "",
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchDataSource").Once().Return(
-					"datasource",
-					nil,
-				)
-				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(""),
-					nil,
-				)
+			scraperSetup: func(s *mocks.Scraper) {
+				s.On("FindDataSourceURL", "csv", "/government/publications/register-of-licensed-sponsors-workers").Return("default_url", nil)
+				s.On("GetContent", "default_url").Return([]byte("data"), nil)
 			},
-			processorSetup: func(client *mocks.Processor) {
-				client.On("ProcessRawData", mock.Anything).Once().Return(
-					[]map[string]string{
-						{
-							"Organisation Name": "Awesome company",
-							"Route":             "Skilled Worker",
-						},
-					},
-					nil,
-				)
+			processorSetup: func(p *mocks.Processor) {
+				p.On("ProcessRawData", []byte("data"), &[]sponsors.Organisation{}).Return(nil)
 			},
-			wantErr: false,
 		},
 		{
 			name:       "Successfully load data using custom datasource",
-			datasource: "custom_datasource",
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(""),
-					nil,
-				)
+			datasource: "custom_url",
+			scraperSetup: func(s *mocks.Scraper) {
+				s.On("GetContent", "custom_url").Return([]byte("data_custom"), nil)
 			},
-			processorSetup: func(client *mocks.Processor) {
-				client.On("ProcessRawData", mock.Anything).Once().Return(
-					[]map[string]string{
-						{
-							"Organisation Name": "Awesome company",
-							"Route":             "Skilled Worker",
-						},
-					},
-					nil,
-				)
+			processorSetup: func(p *mocks.Processor) {
+				p.On("ProcessRawData", []byte("data_custom"), &[]sponsors.Organisation{}).Return(nil)
 			},
-			wantErr: false,
 		},
 		{
-			name:       "Successfully load data using custom datasource, but it's empty",
-			datasource: "custom_datasource",
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(""),
-					nil,
-				)
+			name:       "Error during data fetching",
+			datasource: "",
+			scraperSetup: func(s *mocks.Scraper) {
+				s.On("FindDataSourceURL", "csv", "/government/publications/register-of-licensed-sponsors-workers").Return("", errors.New("fetching error"))
 			},
-			processorSetup: func(client *mocks.Processor) {
-				client.On("ProcessRawData", mock.Anything).Once().Return(
-					[]map[string]string{},
-					nil,
-				)
-			},
-			wantEmptyOrgs: true,
-			wantErr:       false,
+			expectError: true,
 		},
 		{
-			name: "Failed to load due to failure to fetch datasource",
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchDataSource").Once().Return(
-					"",
-					errors.New("failed to fetch datasource"),
-				)
+			name:       "Error during data processing",
+			datasource: "custom_url",
+			scraperSetup: func(s *mocks.Scraper) {
+				s.On("GetContent", "custom_url").Return([]byte("data_error"), nil)
 			},
-			wantErr: true,
-		},
-		{
-			name:       "Failed to load due to failure to fetch data from datasource",
-			datasource: "custom_datasource",
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(""),
-					errors.New("failed to fetch datasource"),
-				)
+			processorSetup: func(p *mocks.Processor) {
+				p.On("ProcessRawData", []byte("data_error"), &[]sponsors.Organisation{}).Return(errors.New("processing error"))
 			},
-			wantErr: true,
-		},
-		{
-			name:       "Failed to process data due to incompatibility",
-			datasource: "custom_datasource",
-			fetcherSetup: func(client *mocks.Fetcher) {
-				client.On("FetchData", mock.Anything).Once().Return(
-					[]byte(""),
-					nil,
-				)
-			},
-			processorSetup: func(client *mocks.Processor) {
-				client.On("ProcessRawData", mock.Anything).Once().Return(
-					[]map[string]string{
-						{
-							"OrganisationName": "Awesome company",
-							"Route":            "Skilled Worker",
-						},
-					},
-					nil,
-				)
-			},
-			wantErr: true,
+			expectError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fetcherMock := mocks.NewFetcher(t)
-			if tt.fetcherSetup != nil {
-				tt.fetcherSetup(fetcherMock)
-			}
-
+			scraperMock := mocks.NewScraper(t)
 			processorMock := mocks.NewProcessor(t)
+
+			if tt.scraperSetup != nil {
+				tt.scraperSetup(scraperMock)
+			}
 			if tt.processorSetup != nil {
 				tt.processorSetup(processorMock)
 			}
 
-			handler, err := sponsors.NewHandler(fetcherMock, processorMock, false)
-			require.NoError(t, err)
+			handler := sponsors.NewHandler(scraperMock, processorMock)
+			err := handler.Load(tt.datasource)
 
-			err = handler.Load(tt.datasource)
-			if tt.wantErr {
+			if tt.expectError {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-
-				if tt.wantEmptyOrgs {
-					require.Empty(t, handler.Organisations.List())
-				} else {
-					require.NotEmpty(t, handler.Organisations.List())
-				}
 			}
 		})
 	}

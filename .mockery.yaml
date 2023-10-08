@@ -1,9 +1,12 @@
 with-expecter: true
+dir: "{{.InterfaceDirRelative}}/mocks"
+filename: "{{.InterfaceName}}.go"
+outpkg: "mocks_test"
+mockname: "{{.InterfaceName}}"
 packages:
+  renatoaraujo/uk-visa-sponsors/pkg/scraper:
+    config:
+      all: true
   renatoaraujo/uk-visa-sponsors/internal/sponsors:
     config:
       all: True
-      dir: "{{.InterfaceDirRelative}}/mocks"
-      outpkg: "mocks_test"
-      filename: "{{.InterfaceName}}.go"
-      mockname: "{{.InterfaceName}}"

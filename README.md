@@ -9,7 +9,7 @@ While navigating through job listings in the UK, I stumbled upon numerous opport
 
 ## Prerequisites
 
-- Go 1.21.x
+- Go >= 1.21
 - Make (Optional)
 
 ## How to Use
@@ -25,6 +25,10 @@ If you prefer not to employ `make`, no worries! Construct and execute directly f
 ```bash
 go build -o sponsors . && chmod +x ./sponsors && ./sponsors find -c [company-name]
 ```
+
+#### Additional options
+- `-d`, `--datasource`: string containing an extra datasource, for example an old version of the CSV or a sanitised one;
+- `-h`, `--help`: To get help with the command
 
 ## Credits
 
