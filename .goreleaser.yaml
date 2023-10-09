@@ -1,5 +1,6 @@
 builds:
   - binary: ukvisasponsors
+    main: ./cmd/cli/main.go
     goos:
       - darwin
       - linux
