@@ -1,7 +1,7 @@
 .PHONY: build
 
 build:
-	go build -o sponsors ./cmd/cli/main.go
+	go build -o ukvisasponsors ./cmd/cli/main.go
 
 test:
 	go test -race -v ./...
