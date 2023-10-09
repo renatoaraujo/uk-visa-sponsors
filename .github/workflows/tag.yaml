@@ -20,7 +20,7 @@ jobs:
       - name: Run Tests
         run: go test -race -v ./...
 
-  release:
+  tag:
     needs: test
     runs-on: ubuntu-latest
     steps:
