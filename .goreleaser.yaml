@@ -24,7 +24,7 @@ universal_binaries:
 brews:
   - name: ukvisasponsors
     homepage: https://github.com/renatoaraujo/uk-visa-sponsors
-    download_strategy: GitDownloadStrategy
+    download_strategy: CurlDownloadStrategy
     repository:
       owner: renatoaraujo
       name: homebrew-renatoaraujo
