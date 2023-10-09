@@ -28,8 +28,6 @@ brews:
     repository:
       owner: renatoaraujo
       name: homebrew-renatoaraujo
-    commit_author:
-      name: renatoaraujo
 
 checksum:
   name_template: 'checksums.txt'
