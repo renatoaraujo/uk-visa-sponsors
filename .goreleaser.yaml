@@ -1,5 +1,5 @@
 builds:
-  - binary: ukvisasponsors
+  - binary: uk-visa-sponsors
     main: ./cmd/cli/main.go
     goos:
       - darwin
@@ -22,9 +22,8 @@ universal_binaries:
   - replace: true
 
 brews:
-  - name: ukvisasponsors
+  - name: uk-visa-sponsors
     homepage: https://github.com/renatoaraujo/uk-visa-sponsors
-    download_strategy: CurlDownloadStrategy
     repository:
       owner: renatoaraujo
       name: homebrew-renatoaraujo
