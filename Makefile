@@ -1,16 +1,16 @@
-.PHONY: build
+.PHONY: build test help find
 
 build:
-	go build -o ukvisasponsors ./cmd/cli/main.go
+	go build -o uk-visa-sponsors ./cmd/cli/main.go
 
 test:
 	go test -race -v ./...
 
 help: build
-	@./sponsors help
+	@./uk-visa-sponsors help
 
 find: build
-	@./sponsors find --company $(firstword $(filter-out $@,$(MAKECMDGOALS)))
+	@./uk-visa-sponsors find --company $(firstword $(filter-out $@,$(MAKECMDGOALS)))
 
 %:
 	@:
