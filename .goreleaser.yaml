@@ -24,12 +24,12 @@ universal_binaries:
 brews:
   - name: ukvisasponsors
     homepage: https://github.com/renatoaraujo/uk-visa-sponsors
-    tap:
+    download_strategy: GitDownloadStrategy
+    repository:
       owner: renatoaraujo
       name: homebrew-renatoaraujo
     commit_author:
       name: renatoaraujo
-      email: me@renato.id
 
 checksum:
   name_template: 'checksums.txt'
